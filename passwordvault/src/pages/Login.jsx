@@ -44,9 +44,18 @@ const Login = () => {
   const { mutateAsync: generateNewPassword, isLoading: generateNewPasswordL } =
     useContractWrite(contract, 'generateNewPassword');
 
+    const { data:owner, isLoading:ownerLoading } = useContractRead(contract, "owner")
+
   const generatePass = async () => {
+    const notify = toast.loading('Changing password');
     try {
-      const data = await generateNewPassword({ args: [] });
+      let data;
+      if(address === owner) {
+        data = await generateNewPassword({ args: [] });
+        toast.success('Password changed', {id: notify})
+      } else {
+        toast.error('You are not the owner', {id: notify});
+      }
 
       if (data) {
         var templateParams = {

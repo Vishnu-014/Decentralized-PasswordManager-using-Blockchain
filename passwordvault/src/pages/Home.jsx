@@ -26,6 +26,7 @@ const Home = () => {
 
   const [credentials, setCredentials] = useState([]);
   const [clickedData, setClickedData] = useState(null);
+  const [searchText, setSearchText] = useState('')
   const [show, setShow] = useState(false);
 
   const renderBackdrop = (props) => (
@@ -57,8 +58,6 @@ const Home = () => {
     'CredentialsStored'
   );
 
-  
-
   const getData = () => {
     const notify = toast.loading('Credentials Loading ...');
     let allItemsC = [];
@@ -69,6 +68,40 @@ const Home = () => {
     setCredentials(allItemsC.reverse());
     toast.success('Credentials Loaded', { id: notify });
   };
+
+  //? TODO UPDATE
+  const {
+    mutateAsync: updateCredentials,
+    isLoading: updateCredentialsLoading,
+  } = useContractWrite(contract, 'updateCredentials');
+  const updateHandler = async () => {
+    const notify = toast.loading('Updating Credential...');
+    try {
+    } catch (error) {}
+  };
+
+  const {
+    mutateAsync: deleteCredentials,
+    isLoading: deleteCredentialsLoading,
+  } = useContractWrite(contract, 'deleteCredentials');
+  const deleteHandler = async () => {
+    const notify = toast.loading('Deleting Credential...');
+    try {
+      let website = clickedData.website;
+      const data = await deleteCredentials({ args: [website] });
+      toast.success('Deleted Successfully', { id: notify });
+      console.info('contract call successs', data);
+    } catch (err) {
+      toast.error('Whoops, Something went wrong', { id: notify });
+      console.error('contract call failure', err);
+    }
+  };
+
+
+  // TODO searchHandler
+  const searchHandler = () => {
+
+  }
 
   useEffect(() => {
     getData();
@@ -96,9 +129,9 @@ const Home = () => {
           <input
             type="text"
             placeholder="Search"
-            className="w-96 max-w-xs border border-purple-600 py-2 px-4 rounded-md placeholder:text-purple-500"
+            className="w-96 max-w-xs border border-purple-600 py-2 px-4 rounded-md placeholder:text-gray-500"
           />
-          <AiOutlineSearch size={34} className="text-purple-500" />
+          <AiOutlineSearch size={34} className="text-purple-700" />
         </div>
 
         <div className="flex flex-row items-center justify-center gap-2">
@@ -151,7 +184,7 @@ const Home = () => {
       </div>
 
       {clickedData && (
-        <div className="absolute top-24 right-[5%] flex flex-col gap-4 bg-gradient-to-tl from-[#e3e3e3] to-[#efefef] w-[1000px] h-96 p-5 border-3 border-purple-500 drop-shadow-xl rounded-xl">
+        <div className="absolute top-24 right-[5%] flex flex-col gap-4 bg-gradient-to-tl from-[#f1f1f1] to-[#ffffff] w-[1000px] h-96 p-5 border-3 border-purple-500 drop-shadow-xl rounded-xl">
           <div className="font-medium space-y-2">
             <h1 className="font-bold">
               Username:{' '}
@@ -182,6 +215,19 @@ const Home = () => {
                 ]}
                 password={clickedData?.password}
               />
+            </div>
+            <div className="flex flex-row items-center justify-center mt-3 gap-3 text-white font-medium ">
+              <button 
+              onClick={() => updateHandler()}
+              className="bg-blue-500 px-4 py-2 rounded-md tracking-wide uppercase cursor-not-allowed">
+                Update
+              </button>
+              <button
+                onClick={() => deleteHandler()}
+                className="bg-red-500 px-4 py-2 rounded-md tracking-wide uppercase"
+              >
+                Delete
+              </button>
             </div>
           </div>
         </div>
