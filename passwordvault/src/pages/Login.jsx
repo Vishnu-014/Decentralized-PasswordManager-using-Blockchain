@@ -34,6 +34,7 @@ const Login = () => {
   const { data: loginVerification, isLoading: loginVerificationL } =
     useContractRead(contract, 'login', [userPassword]);
 
+
   console.log(currentPassword);
   console.log('====================================');
   console.log(loginVerification);
@@ -47,14 +48,14 @@ const Login = () => {
     try {
       const data = await generateNewPassword({ args: [] });
 
-      if(data) {
+      if (data) {
         var templateParams = {
           to_name: 'Vishnu',
           from_name: 'Web3 random Password',
           message: `Generated new Password ${data}`,
           userPass: userPassword,
         };
-  
+
         emailjs
           .send(
             'service_uf5805x',
@@ -80,7 +81,7 @@ const Login = () => {
 
   useEffect(() => {
     console.log('use');
-    if(currentPassword) {
+    if (currentPassword) {
       var templateParams = {
         to_name: 'Vishnu',
         from_name: 'Web3 random Password',
@@ -103,7 +104,7 @@ const Login = () => {
           }
         );
     }
-  }, [generatePass])  
+  }, [generatePass]);
 
   const submitHandler = (e) => {
     e.preventDefault();

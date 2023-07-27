@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { IoIosArrowForward } from 'react-icons/io';
@@ -10,49 +10,30 @@ import {
   useContractWrite,
   useDisconnect,
   useMetamask,
+  useContractEvents,
 } from '@thirdweb-dev/react';
 import PasswordStrengthBar from 'react-password-strength-bar';
 import { SocialIcon } from 'react-social-icons';
 import Add from './Add';
-
-const data = [
-  {
-    username: 'Vishnu',
-    password: '234kn3as',
-    website: 'www.youtube.com',
-  },
-  {
-    username: 'wishhh14',
-    password: 'afjkhs',
-    website: 'www.discord.com',
-  },
-  {
-    username: 'john_doe',
-    password: 'P@ssw0rd!123',
-    website: 'facebook.com',
-  },
-  {
-    username: 'jane_smith',
-    password: 'S3cur3Pwd!789',
-    website: 'google.com',
-  },
-  {
-    username: 'testuser',
-    password: 'C0mpl3xPwd$2023',
-    website: 'twitter.com',
-  },
-  {
-    username: 'webuser',
-    password: 'G1thub@ccess!',
-    website: 'github.com',
-  },
-];
+import pass from '../assets/password-svgrepo-com.svg';
+import Modal from 'react-overlays/Modal';
+import { toast } from 'react-hot-toast';
+import { id } from 'ethers/lib/utils';
 
 const Home = () => {
   const { state } = useLocation();
   const { isAuth } = state;
 
+  const [credentials, setCredentials] = useState([]);
   const [clickedData, setClickedData] = useState(null);
+  const [show, setShow] = useState(false);
+
+  const renderBackdrop = (props) => (
+    <div
+      className="z-50 fixed top-0 bottom-0 left-0 right-0 bg-[#000] opacity-50"
+      {...props}
+    />
+  );
 
   const { contract } = useContract(
     '0x9454749cEB6f8BAcBe48C1c7660D1a6eEeb20EA6'
@@ -63,9 +44,35 @@ const Home = () => {
   const address = useAddress();
   const navigate = useNavigate();
 
-  console.log('====================================');
-  console.log(clickedData);
-  console.log('====================================');
+  const { data: currentPassword, isLoading: currentPasswordLoading } =
+    useContractRead(contract, 'currentPassword');
+
+  const { data: getDataC, isLoading: currentLoading } = useContractRead(
+    contract,
+    'getCredentials'
+  );
+
+  const { data: event, isLoading: eventLoading } = useContractEvents(
+    contract,
+    'CredentialsStored'
+  );
+
+  
+
+  const getData = () => {
+    const notify = toast.loading('Credentials Loading ...');
+    let allItemsC = [];
+    for (let i = 0; i < event?.length; i++) {
+      let item = event[i].data;
+      allItemsC.push(item);
+    }
+    setCredentials(allItemsC.reverse());
+    toast.success('Credentials Loaded', { id: notify });
+  };
+
+  useEffect(() => {
+    getData();
+  }, [event, eventLoading]);
 
   return (
     <div className="m-5 relative">
@@ -96,7 +103,13 @@ const Home = () => {
 
         <div className="flex flex-row items-center justify-center gap-2">
           <button
-            onClick={() => navigate('/add')}
+            onClick={() => getData()}
+            className="bg-[#1D5D9B] px-4 py-2 rounded-md text-white"
+          >
+            Get Credentials
+          </button>
+          <button
+            onClick={() => setShow(true)}
             className="bg-[#A459D1] px-4 py-2 rounded-md text-white"
           >
             Add New
@@ -111,7 +124,7 @@ const Home = () => {
       </div>
 
       <div className="absolute top-24 flex flex-col gap-4 overflow-y-auto scroll-smooth h-[700px]">
-        {data.map((item, index) => {
+        {credentials.map((item, index) => {
           return (
             <div
               onClick={() => setClickedData(item)}
@@ -173,6 +186,14 @@ const Home = () => {
           </div>
         </div>
       )}
+
+      <Modal
+        show={show}
+        onHide={() => setShow(false)}
+        renderBackdrop={renderBackdrop}
+      >
+        <Add />
+      </Modal>
     </div>
   );
 };

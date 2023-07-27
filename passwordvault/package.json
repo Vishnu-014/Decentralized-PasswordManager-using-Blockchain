@@ -15,6 +15,7 @@
     "react-dom": "^18.2",
     "react-hot-toast": "^2.4.1",
     "react-icons": "^4.10.1",
+    "react-overlays": "^5.2.1",
     "react-password-strength-bar": "^0.4.1",
     "react-scripts": "^5.0.1",
     "react-social-icons": "^5.15.0",
